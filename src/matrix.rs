@@ -266,13 +266,13 @@ impl Matrix {
         }
     }
 
+    // https://arxiv.org/pdf/cs/0011047.pdf
     // Returns true if a solution was found, false otherwise. If a solution was found then
     // the solution_rows will contain the row indices of all rows in the solution, otherwise
     // the solution_rows will have the same contents it had when the function was called.
     fn search_first(&mut self, solution_rows: &mut Vec<usize>) -> bool {
         // If all columns are covered, then we've found a solution.
         if self.nodes[Matrix::ROOT_INDEX].right == Matrix::ROOT_INDEX {
-            println!("All columns covered, we found a solution!");
             return true;
         }
 
@@ -293,11 +293,8 @@ impl Matrix {
             (min_header_index, min_column_size)
         };
 
-        // println!("min_header_index = {}, min_column_size = {}", min_header_index, min_column_size);
-
         // If we found a column with no nodes in it, then there is no exact cover solution.
         if min_column_size == 0 {
-            println!("Found column with no nodes; no exact cover solutio");
             return false;
         }
 

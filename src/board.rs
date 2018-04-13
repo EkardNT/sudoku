@@ -79,10 +79,11 @@ impl Board {
         }
     }
 
-    pub fn to_line<W: Write>(&self, to: &mut W) {
-        for c in self.entries.iter() {
+    pub fn to_line<W: ::std::io::Write>(&self, to: &mut W) {
+        for c in self.entries[0..9*9-1].iter() {
             write!(to, "{} ", c);
         }
+        write!(to, "{}", self.entries[9*9-1]);
     }
 
     pub fn get_entry(&self, row: usize, column: usize) -> Option<usize> {
@@ -150,16 +151,17 @@ impl Board {
         let mut entries = [0usize; 9 * 9];
         let mut i = 0;
         for c in input.chars() {
-            if i >= entries.len() {
-                return Err(ParseBoardError::TooManyEntries);
-            }
             if let Some(value) = c.to_digit(10) {
+                if i >= entries.len() {
+                    return Err(ParseBoardError::TooManyEntries);
+                }
                 assert!(value >= 0 && value <= 9);
                 entries[i] = value as usize;
                 i += 1;
-            } else if ' ' != c {
-                return Err(ParseBoardError::InvalidCharacter(c));
             }
+        }
+        if i != entries.len() {
+            return Err(ParseBoardError::TooFewEntries);
         }
         Ok(Board { entries })
     }
@@ -222,7 +224,8 @@ fn fmt_row(board: &Board, f: &mut Formatter, buf: &mut String, row: usize) -> Re
 #[derive(Debug)]
 pub enum ParseBoardError {
     TooManyEntries,
-    InvalidCharacter(char)
+    InvalidCharacter(char),
+    TooFewEntries
 }
 
 impl Eq for Board {}

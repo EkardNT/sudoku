@@ -1,39 +1,36 @@
 extern crate sudoku;
 
+use std::io::{self, BufRead, Write};
+use std::process;
+
 fn main() {
-    // let mut puzzle = sudoku::Puzzle::from_string(
-        // "5 3 _ _ 7 _ _ _ _\
-        //  6 _ _ 1 9 5 _ _ _\
-        //  _ 9 8 _ _ _ _ 6 _\
-        //  8 _ _ _ 6 _ _ _ 3\
-        //  4 _ _ 8 _ 3 _ _ 1\
-        //  7 _ _ _ 2 _ _ _ 6\
-        //  _ 6 _ _ _ _ 2 8 _\
-        //  _ _ _ 4 1 9 _ _ 5\
-        //  _ _ _ _ 8 _ _ 7 9"
-    // );
-    let mut board = sudoku::Board::from_multiline_str(
-        "5 3 _ _ 7 _ _ _ _\
-         6 _ _ 1 9 5 _ _ _\
-         _ 9 8 _ _ _ _ 6 _\
-         8 _ _ _ 6 _ _ _ 3\
-         4 _ _ 8 _ 3 _ _ 1\
-         7 _ _ _ 2 _ _ _ 6\
-         _ 6 _ _ _ _ 2 8 _\
-         _ _ _ 4 1 9 _ _ 5\
-         _ _ _ _ 8 _ _ 7 9").unwrap();
-    println!("{:?}", board);
-    board.solve();
-    println!("-----------------");
-    // let solution_rows = board.init_solution_rows();
-    // println!("{:?}", solution_rows);
-    println!("{:?}", board);
-    // let mut string = format!("{}", board1);
-    // let mut board2 = sudoku::Board::from_str(&string).unwrap();
-    // assert_eq!(board1, board2);
-    // println!("{}", board1);
-    // println!("{}", board2);
-    // let mut line = String::new();
-    // board1.to_line(&mut line);
-    // println!("{}", line);
+    let stdin = io::stdin();
+    let mut stdin_lock = stdin.lock();
+
+    let stdout = io::stdout();
+    let mut stdout_lock = stdout.lock();
+
+    let mut line = String::with_capacity(9*9*2+1);
+    while let Ok(bytes_read) = stdin_lock.read_line(&mut line) {
+        if (bytes_read == 0) {
+            break;
+        }
+        line.trim();
+        let board = sudoku::Board::from_singleline_str(&line);
+        if let Err(err) = board {
+            eprintln!("Invalid board: {:?}", err);
+            process::exit(1);
+        }
+        let mut board = board.unwrap();
+        let solved = board.solve();
+        // writeln!(stdout_lock, "{}", board);
+        if let Ok(_) = solved {
+            board.to_line(&mut stdout_lock);
+            writeln!(stdout_lock);
+            stdout_lock.flush();
+        } else {
+            eprintln!("No solution");
+        }
+        line.clear();
+    }
 }
